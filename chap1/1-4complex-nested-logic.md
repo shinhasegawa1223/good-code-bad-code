@@ -78,85 +78,100 @@ if (conditionA) {
 
 ---
 
-### 🌟 改善版コード（条件の集約によるフラット化 / 関心の分離）
+### 🌟 改善版コード（条件の隠蔽 / メソッドへの抽出）
 
-複雑に絡み合った複数の条件を論理演算子（AND, OR）を使って**条件を集約（結合）**するか、あるいは意味のある単位に**メソッド抽出（関心の分離）**してネストを解消します。今回は条件の集約によるフラット化を行います。
+論理演算子（AND, OR）で長々と繋げるだけの `if (A && B && C)` もネストよりはマシですが、条件が複雑になると「なぜこの組み合わせで実行されるのか（ビジネスルール）」が分かりにくくなります。真のベストプラクティスは、**複雑な条件式そのものを意味のある名前のメソッドとして抽出（カプセル化）する**ことです。
 
 **Java:**
 ```java
-// 条件を結合し、ネストを排除してフラットに並べる
-if (conditionA && conditionB && conditionC) {
-    // 処理1
+// 条件をメソッドに抽出し、「何のための条件か（ビジネスルール）」を名前で語らせる
+if (isValidUser(conditionA, conditionB, conditionC)) {
+    // 処理1（例：ログイン成功処理）
 }
 
-if (conditionA && conditionB && conditionD) {
-    // 処理2
+if (isPremiumMember(conditionA, conditionB, conditionD)) {
+    // 処理2（例：優先クーポンの表示処理）
 }
 
-if (conditionA && conditionE && conditionF) {
-    // 処理3
+if (needsPasswordReset(conditionA, conditionE, conditionF)) {
+    // 処理3（例：警告メッセージの表示処理）
 }
 
-if (conditionA && conditionE && conditionG) {
-    // 処理4
+if (isAccountLocked(conditionA, conditionE, conditionG)) {
+    // 処理4（例：ロック画面への遷移）
+}
+
+// 抽出されたメソッド（例）
+private boolean isValidUser(boolean a, boolean b, boolean c) {
+    return a && b && c;
 }
 ```
 
 **Python:**
 ```python
-# 条件を結合し、ネストを排除してフラットに並べる
-if condition_a and condition_b and condition_c:
-    pass # 処理1
+# 条件をメソッドに抽出し、「何のための条件か（ビジネスルール）」を名前で語らせる
+if is_valid_user(condition_a, condition_b, condition_c):
+    pass # 処理1（例：ログイン成功処理）
 
-if condition_a and condition_b and condition_d:
-    pass # 処理2
+if is_premium_member(condition_a, condition_b, condition_d):
+    pass # 処理2（例：優先クーポンの表示処理）
 
-if condition_a and condition_e and condition_f:
-    pass # 処理3
+if needs_password_reset(condition_a, condition_e, condition_f):
+    pass # 処理3（例：警告メッセージの表示処理）
 
-if condition_a and condition_e and condition_g:
-    pass # 処理4
+if is_account_locked(condition_a, condition_e, condition_g):
+    pass # 処理4（例：ロック画面への遷移）
+
+# 抽出されたメソッド（例）
+def is_valid_user(a, b, c):
+    return a and b and c
 ```
 
-**typescript:**
+**TypeScript:**
 ```typescript
-// 条件を結合し、ネストを排除してフラットに並べる
-if (conditionA && conditionB && conditionC) {
-    // 処理1
+// 条件をメソッドに抽出し、「何のための条件か（ビジネスルール）」を名前で語らせる
+if (isValidUser(conditionA, conditionB, conditionC)) {
+    // 処理1（例：ログイン成功処理）
 }
 
-if (conditionA && conditionB && conditionD) {
-    // 処理2
+if (isPremiumMember(conditionA, conditionB, conditionD)) {
+    // 処理2（例：優先クーポンの表示処理）
 }
 
-if (conditionA && conditionE && conditionF) {
-    // 処理3
+if (needsPasswordReset(conditionA, conditionE, conditionF)) {
+    // 処理3（例：警告メッセージの表示処理）
 }
 
-if (conditionA && conditionE && conditionG) {
-    // 処理4
+if (isAccountLocked(conditionA, conditionE, conditionG)) {
+    // 処理4（例：ロック画面への遷移）
+}
+
+// 抽出されたメソッド（例）
+function isValidUser(a: boolean, b: boolean, c: boolean): boolean {
+    return a && b && c;
 }
 ```
 
 #### 改善のポイント
-- `if(A){ if(B){ if(C){} } }` → **`if(A && B && C)`**: 複数の条件が合致したときにだけ実行されるなら、それをネストではなく「論理積（AND）」で表すことで一行の条件に結合しました。
-- 独立したブロック化: それぞれの「処理」を実行するための条件がコード上で明確に分断（独立）されるため、「他の状態を気にせずにその処理の条件だけを読めばよい」という状態に改善されました。
+- `if (A && B && C)` → **`if (isValidUser(...))`**: ただ条件演算子で繋ぐだけでなく、その条件群が**「ビジネスとして（仕様上）どういう状態なのか」**を英語のメソッド名として命名（カプセル化）しました。
+- ロジックとルールの分離: `if` 文を読むときに、わざわざ `&&` の中身を一つ一つ解読しなくても「この条件名を満たせば、この処理が行われる」という意図が自然言語的（英文のよう）に読めるようになりました。
 
 ---
 
-### 🎯 まとめ（条件集約における考え方）
+### 🎯 まとめ（条件式カプセル化における考え方）
 
 複雑なネストから脱却し、正しいコードを書くための考え方を「目的・目標・手段」の順に整理します。
 
 #### 1. 目的（Why: なぜこれにこだわるのか？）
-* **「状態爆発（バグの発生源）を防ぐため」**
-  * `if` 文の中にさらに別の判定をいくつも重ねると、掛け算式で考慮すべきパターンが増え、テストも修正もできなくなります。
+* **「状態の意図（ビジネスルール）を明確にするため」**
+  * 条件が複雑になればなるほど、AND(`&&`)やOR(`||`)で繋ぐだけでは「なぜその条件の組み合わせが必要なのか」という理由（仕様）がコードから失われてしまうため。
 
 #### 2. 目標（What: どのような状態を目指すのか？）
-* **「それぞれの処理の実行条件が独立している状態」**
-  * ある記述を読むとき、その「スコープの外側」にある情報をいちいち頭に留めておかなくても、その一行を読むだけで「いつ実行されるか」が明らかな状態を目指します。
+* **「`if`文が自然言語（英語の文章）のように読める状態」**
+  * ある記述を読むとき、「このフラグがtrueで、かつあの数値が0以上なら」と条件の"仕組み"を解読するのではなく、「これがプレミアム会員なら」と条件の"意味"が即座に理解できる状態を目指します。
 
 #### 3. 手段（How: どうやって達成するのか？）
-* **「ネストを論理演算子（AND/OR）に変換する」**
-  * ❌ 外側の `if` に内包させて前提条件を引き継ぐ → ⭕️ 必要な条件を `&&` で連結して、処理ごとに独立させる。
-  * `if` 文の中に別の `if` 文を書きたくなったら、「それらを `&&` で繋いで並列に書けないか？」「別のメソッドに切り出して整理できないか？」を疑う習慣をつけることが大切です。
+* **「条件をメソッドや変数に抽出（カプセル化）する」**
+  * ❌ `if (A && B && C) { ... }` 
+  * ⭕️ `boolean isPremium = (A && B && C); if (isPremium) { ... }` または `if (isPremiumUser(...)) { ... }`
+  * `if` 文の条件式が2つ以上になった場合や、複雑に絡み合いそうになった場合、「この条件の組み合わせが意味する『名前』は何か？」を考えて別メソッド等にくくり出す（Extract Method）習慣をつけることが大切です。
