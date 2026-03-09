@@ -84,71 +84,70 @@ if (conditionA) {
 
 **Java:**
 ```java
-// 条件をメソッドに抽出し、「何のための条件か（ビジネスルール）」を名前で語らせる
-if (isValidUser(conditionA, conditionB, conditionC)) {
+// 例えばログインや権限確認などのバラバラの条件（変数）があるとする
+boolean hasValidId = ...;
+boolean hasCorrectPassword = ...;
+boolean isNotBanned = ...;
+boolean hasPaidSubscription = ...;
+
+// バラバラの複雑な条件をメソッド（関数）にまとめ、「何のための条件か（ビジネスルール）」を名前で語らせる
+if (isValidUser(hasValidId, hasCorrectPassword, isNotBanned)) {
     // 処理1（例：ログイン成功処理）
 }
 
-if (isPremiumMember(conditionA, conditionB, conditionD)) {
+if (isPremiumMember(hasValidId, hasCorrectPassword, hasPaidSubscription)) {
     // 処理2（例：優先クーポンの表示処理）
 }
 
-if (needsPasswordReset(conditionA, conditionE, conditionF)) {
-    // 処理3（例：警告メッセージの表示処理）
-}
-
-if (isAccountLocked(conditionA, conditionE, conditionG)) {
-    // 処理4（例：ロック画面への遷移）
-}
-
-// 抽出されたメソッド（例）
-private boolean isValidUser(boolean a, boolean b, boolean c) {
-    return a && b && c;
+// 抽出されたメソッド
+// （「IDが正しくて、パスワードも正しくて、BANされてない」なら「正当なユーザー」というルールを定義する）
+private boolean isValidUser(boolean hasValidId, boolean hasCorrectPassword, boolean isNotBanned) {
+    return hasValidId && hasCorrectPassword && isNotBanned;
 }
 ```
 
 **Python:**
 ```python
-# 条件をメソッドに抽出し、「何のための条件か（ビジネスルール）」を名前で語らせる
-if is_valid_user(condition_a, condition_b, condition_c):
+# 例えばログインや権限確認などのバラバラの条件（変数）があるとする
+has_valid_id = ...
+has_correct_password = ...
+is_not_banned = ...
+has_paid_subscription = ...
+
+# バラバラの複雑な条件をメソッド（関数）にまとめ、「何のための条件か（ビジネスルール）」を名前で語らせる
+if is_valid_user(has_valid_id, has_correct_password, is_not_banned):
     pass # 処理1（例：ログイン成功処理）
 
-if is_premium_member(condition_a, condition_b, condition_d):
+if is_premium_member(has_valid_id, has_correct_password, has_paid_subscription):
     pass # 処理2（例：優先クーポンの表示処理）
 
-if needs_password_reset(condition_a, condition_e, condition_f):
-    pass # 処理3（例：警告メッセージの表示処理）
-
-if is_account_locked(condition_a, condition_e, condition_g):
-    pass # 処理4（例：ロック画面への遷移）
-
-# 抽出されたメソッド（例）
-def is_valid_user(a, b, c):
-    return a and b and c
+# 抽出されたメソッド
+# （「IDが正しくて、パスワードも正しくて、BANされてない」なら「正当なユーザー」というルールを定義する）
+def is_valid_user(has_valid_id, has_correct_password, is_not_banned):
+    return has_valid_id and has_correct_password and is_not_banned
 ```
 
 **TypeScript:**
 ```typescript
-// 条件をメソッドに抽出し、「何のための条件か（ビジネスルール）」を名前で語らせる
-if (isValidUser(conditionA, conditionB, conditionC)) {
+// 例えばログインや権限確認などのバラバラの条件（変数）があるとする
+let hasValidId = ...;
+let hasCorrectPassword = ...;
+let isNotBanned = ...;
+let hasPaidSubscription = ...;
+
+// バラバラの複雑な条件をメソッド（関数）にまとめ、「何のための条件か（ビジネスルール）」を名前で語らせる
+if (isValidUser(hasValidId, hasCorrectPassword, isNotBanned)) {
     // 処理1（例：ログイン成功処理）
 }
 
-if (isPremiumMember(conditionA, conditionB, conditionD)) {
+if (isPremiumMember(hasValidId, hasCorrectPassword, hasPaidSubscription)) {
     // 処理2（例：優先クーポンの表示処理）
 }
 
-if (needsPasswordReset(conditionA, conditionE, conditionF)) {
-    // 処理3（例：警告メッセージの表示処理）
-}
-
-if (isAccountLocked(conditionA, conditionE, conditionG)) {
-    // 処理4（例：ロック画面への遷移）
-}
-
-// 抽出されたメソッド（例）
-function isValidUser(a: boolean, b: boolean, c: boolean): boolean {
-    return a && b && c;
+// 抽出されたメソッド
+// （「IDが正しくて、パスワードも正しくて、BANされてない」なら「正当なユーザー」というルールを定義する）
+function isValidUser(hasValidId: boolean, hasCorrectPassword: boolean, isNotBanned: boolean): boolean {
+    return hasValidId && hasCorrectPassword && isNotBanned;
 }
 ```
 
