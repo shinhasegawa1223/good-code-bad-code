@@ -4,8 +4,8 @@
 ```java
 if (0 < member.hitpoint){
     if(member.canAct()){
-        if(magic.costMagicPoint <= member.magicPoint){
-            member.consumeMagicPoint(magic.costMagicPoint);
+        if(magic.costMagincPoint <= member.magicPoint){
+            member.counsumeMagicPoint(magic.costMagicPoint);
             member.chant(magic);
         }
     }
