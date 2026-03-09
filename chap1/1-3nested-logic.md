@@ -59,30 +59,42 @@ if (0 < member.hitpoint) {
 
 **Java:**
 ```java
+// ① HPが0以下なら行動できないので弾く
 if (member.hitpoint <= 0) return;
+// ② 状態異常などで行動不能なら弾く
 if (!member.canAct()) return;
+// ③ 魔法を唱えるだけのMPが足りなければ弾く
 if (member.magicPoint < magic.costMagicPoint) return;
 
+// 全ての前提条件をクリアした場合のみ、メインの処理（魔法の詠唱）を行う
 member.consumeMagicPoint(magic.costMagicPoint);
 member.chant(magic);
 ```
 
 **Python:**
 ```python
+# ① HPが0以下なら行動できないので弾く
 if member.hitpoint <= 0: return
+# ② 状態異常などで行動不能なら弾く
 if not member.can_act(): return
+# ③ 魔法を唱えるだけのMPが足りなければ弾く
 if member.magic_point < magic.cost_magic_point: return
 
+# 全ての前提条件をクリアした場合のみ、メインの処理（魔法の詠唱）を行う
 member.consume_magic_point(magic.cost_magic_point)
 member.chant(magic)
 ```
 
 **TypeScript:**
 ```typescript
+// ① HPが0以下なら行動できないので弾く
 if (member.hitpoint <= 0) return;
+// ② 状態異常などで行動不能なら弾く
 if (!member.canAct()) return;
+// ③ 魔法を唱えるだけのMPが足りなければ弾く
 if (member.magicPoint < magic.costMagicPoint) return;
 
+// 全ての前提条件をクリアした場合のみ、メインの処理（魔法の詠唱）を行う
 member.consumeMagicPoint(magic.costMagicPoint);
 member.chant(magic);
 ```
