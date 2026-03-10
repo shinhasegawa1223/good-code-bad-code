@@ -169,6 +169,58 @@ class ContractAmount {
 - `public` → **`private`**: フィールドを `private` にすることで、外部のコードが勝手に値を書き換えることが不可能になりました。値を変えたければ、クラスが提供する正規のルート（コンストラクタ）を通すしかありません。
 - ロジックの集約: 「税込 ＝ 税抜 ＋ 税」「合計 ＝ 税込 − 割引」というビジネスルールがクラスの中に閉じ込められたため、アプリ内のどこでこのクラスを使っても **常に正しい計算結果が保証されます** 。
 
+#### 📝 外部からの使い方（使用例）
+
+改善版クラスは、インスタンスを作成して **メソッドを呼ぶだけ** で正しい計算結果が得られます。
+外部のコードが計算式を知る必要はなく、**クラスに「聞く」だけ** で良いのがポイントです。
+
+**Java:**
+```java
+// 税抜10,000円、税率10%、割引率5% で契約金額を作成
+ContractAmount contract = new ContractAmount(10000, 10, 5);
+
+// メソッドを呼ぶだけで、正しい計算結果が返ってくる
+System.out.println(contract.tax());              // → 1000（税額）
+System.out.println(contract.amountIncludingTax()); // → 11000（税込金額）
+System.out.println(contract.discount());          // → 550（割引額）
+System.out.println(contract.totalAmount());       // → 10450（最終合計）
+
+// ❌ 以下はコンパイルエラー！ private なので外部から直接書き換えられない
+// contract.amountExcludingTax = 99999;  // エラー: privateフィールドにアクセスできない
+```
+
+**Python:**
+```python
+# 税抜10,000円、税率10%、割引率5% で契約金額を作成
+contract: ContractAmount = ContractAmount(10000, 10, 5)
+
+# メソッドを呼ぶだけで、正しい計算結果が返ってくる
+print(contract.tax())                # → 1000（税額）
+print(contract.amount_including_tax())  # → 11000（税込金額）
+print(contract.discount())           # → 550（割引額）
+print(contract.total_amount())       # → 10450（最終合計）
+
+# ❌ 以下は慣習的にNG！ _（アンダースコア）付きは「外部から触らないでください」の意味
+# contract._amount_excluding_tax = 99999  # やってはいけない
+```
+
+**TypeScript:**
+```typescript
+// 税抜10,000円、税率10%、割引率5% で契約金額を作成
+const contract: ContractAmount = new ContractAmount(10000, 10, 5);
+
+// メソッドを呼ぶだけで、正しい計算結果が返ってくる
+console.log(contract.tax());              // → 1000（税額）
+console.log(contract.amountIncludingTax()); // → 11000（税込金額）
+console.log(contract.discount());          // → 550（割引額）
+console.log(contract.totalAmount());       // → 10450（最終合計）
+
+// ❌ 以下はコンパイルエラー！ private なので外部から直接書き換えられない
+// contract.amountExcludingTax = 99999;  // エラー: privateプロパティにアクセスできない
+```
+
+> **使い方のまとめ:** 外部のコードは「税抜金額・税率・割引率」をコンストラクタに渡してインスタンスを作り、あとは `tax()` や `totalAmount()` などの **メソッドに聞く** だけ。計算式を外に書く必要が一切なくなり、常にクラス内部の正しいルールで計算されるため、どこで使っても結果がブレません。
+
 ---
 
 ### 🎯 まとめ（データクラス排除における考え方）

@@ -66,13 +66,13 @@ class UserRegistrationService {
 **Python:**
 ```python
 class UserRegistrationService:
-    def validate_input(self):
+    def validate_input(self) -> None:
         pass
     
-    def save_to_database(self):
+    def save_to_database(self) -> None:
         pass
     
-    def send_welcome_email(self):
+    def send_welcome_email(self) -> None:
         pass
 ```
 

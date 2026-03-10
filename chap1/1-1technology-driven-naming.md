@@ -87,7 +87,9 @@ class PlayerHealth {
 **Python:**
 ```python
 class PlayerHealth:
-    def take_damage(self, damage_amount: int):
+    current_health: int = 0
+
+    def take_damage(self, damage_amount: int) -> None:
         self.current_health -= damage_amount 
         if self.current_health <= 0:
             self.current_health = 0 
