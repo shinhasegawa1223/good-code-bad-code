@@ -144,6 +144,45 @@ HitPoint errorHp = new HitPoint(-10); // IllegalArgumentException!
 
 **Python:**
 ```python
+# 使い方
+hp = HitPoint(100)
+
+# ダメージを受ける
+hp = hp.damage(30)
+
+# 値を取得する（@property のおかげで、メソッド呼び出し()ではなくプロパティのようにアクセスできる）
+print(hp.value) # 70
+
+# ❌ 外部から書き換えようとするとエラーになる（セッターがないため）
+# hp.value = 500 # AttributeError!
+
+# ❌ 不正な値での初期化はフェイルファスト
+# error_hp = HitPoint(-10) # ValueError!
+```
+
+> 💡 **補足: Pythonの `@property`（プロパティデコレータ）とは？**
+> メソッド（この場合は `def value(self)`）を、あたかも「ただの変数（プロパティ）」のようにドットアクセス（`hp.value`）で読み取れるようにする機能です。これにより、内部変数 `_value` を隠蔽し、読み取り専用（Read-only）の変数を簡潔に作ることができます。
+
+**TypeScript:**
+```typescript
+// 使い方
+let hp = new HitPoint(100);
+
+// ダメージを受ける
+hp = hp.damage(30);
+
+// 値を取得する
+console.log(hp.value); // 70
+
+// ❌ TypeScriptの readonly がついているため、コンパイル時にエラーを出してくれる
+// hp.value = 500; // Cannot assign to 'value' because it is a read-only property.
+
+// ❌ 不正な値での初期化はフェイルファスト
+// const errorHp = new HitPoint(-10); // Error!
+```
+
+**Python:**
+```python
 class HitPoint:
     MIN: int = 0
     MAX: int = 999
