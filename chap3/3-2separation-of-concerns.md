@@ -187,6 +187,23 @@ class Player:
             weapon_attack = int(weapon_attack * 1.5)
         return base_attack + weapon_attack
 
+# ✅ Enemyは自分の防御力を自分で計算する
+class Enemy:
+    def __init__(self, vitality: int, level: int, has_defense_buff: bool, hp: HitPoint):
+        self._vitality = vitality
+        self._level = level
+        self._has_defense_buff = has_defense_buff
+        self._hp = hp
+
+    def calculate_defense(self) -> int:
+        defense: int = self._vitality + (self._level * 1)
+        if self._has_defense_buff:
+            defense = int(defense * 1.5)
+        return defense
+
+    def take_damage(self, damage: int) -> None:
+        self._hp = self._hp.damage(damage)
+
 # ✅ BattleServiceは流れの調整だけ
 class BattleService:
     def attack_enemy(self, player: Player, enemy: Enemy) -> None:
@@ -214,6 +231,26 @@ class Player {
             weaponAttack = Math.floor(weaponAttack * 1.5);
         }
         return baseAttack + weaponAttack;
+    }
+}
+
+// ✅ Enemyは自分の防御力を自分で計算する
+class Enemy {
+    private vitality: number;
+    private level: number;
+    private hasDefenseBuff: boolean;
+    private hp: HitPoint;
+
+    calculateDefense(): number {
+        let defense = this.vitality + (this.level * 1);
+        if (this.hasDefenseBuff) {
+            defense = Math.floor(defense * 1.5);
+        }
+        return defense;
+    }
+
+    takeDamage(damage: number): void {
+        this.hp = this.hp.damage(damage);
     }
 }
 
