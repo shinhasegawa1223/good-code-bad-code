@@ -155,6 +155,25 @@ class Player {
 }
 ```
 
+📝 **使い方:**
+```java
+// 物理攻撃の戦士を作る
+Player warrior = new Player(10, new PhysicalAttack());
+warrior.attack(enemy); // ダメージ = 10 * 2 = 20
+
+// 魔法攻撃の魔法使いを作る
+Player mage = new Player(10, new MagicAttack());
+mage.attack(enemy); // ダメージ = 10 * 3 = 30
+
+// 🎉 新しい攻撃を追加したくなったら？→ クラスを1つ作るだけ！
+class PoisonAttack implements AttackStrategy {
+    public int calculateDamage(int basePower) {
+        return basePower + 100; // 毒攻撃は固定ダメージ追加
+    }
+}
+// 既存の Player, PhysicalAttack, MagicAttack のコードは一切変更なし！
+```
+
 **Python:**
 ```python
 from abc import ABC, abstractmethod
@@ -186,6 +205,20 @@ class Player:
     def attack(self, enemy: 'Enemy') -> None:
         damage: int = self._attack_strategy.calculate_damage(self._strength)
         enemy.take_damage(damage)
+```
+
+📝 **使い方:**
+```python
+warrior = Player(strength=10, attack_strategy=PhysicalAttack())
+warrior.attack(enemy)  # ダメージ = 10 * 2 = 20
+
+mage = Player(strength=10, attack_strategy=MagicAttack())
+mage.attack(enemy)     # ダメージ = 10 * 3 = 30
+
+# 🎉 新しい攻撃 → クラスを1つ作るだけ！既存コード変更なし！
+class PoisonAttack(AttackStrategy):
+    def calculate_damage(self, base_power: int) -> int:
+        return base_power + 100
 ```
 
 **TypeScript:**
@@ -222,42 +255,7 @@ class Player {
 }
 ```
 
-#### 📝 外部からの使い方（使用例）
-
-**Java:**
-```java
-// 物理攻撃の戦士を作る
-Player warrior = new Player(10, new PhysicalAttack());
-warrior.attack(enemy); // ダメージ = 10 * 2 = 20
-
-// 魔法攻撃の魔法使いを作る
-Player mage = new Player(10, new MagicAttack());
-mage.attack(enemy); // ダメージ = 10 * 3 = 30
-
-// 🎉 新しい攻撃を追加したくなったら？→ クラスを1つ作るだけ！
-class PoisonAttack implements AttackStrategy {
-    public int calculateDamage(int basePower) {
-        return basePower + 100; // 毒攻撃は固定ダメージ追加
-    }
-}
-// 既存の Player, PhysicalAttack, MagicAttack のコードは一切変更なし！
-```
-
-**Python:**
-```python
-warrior = Player(strength=10, attack_strategy=PhysicalAttack())
-warrior.attack(enemy)  # ダメージ = 10 * 2 = 20
-
-mage = Player(strength=10, attack_strategy=MagicAttack())
-mage.attack(enemy)     # ダメージ = 10 * 3 = 30
-
-# 🎉 新しい攻撃 → クラスを1つ作るだけ！既存コード変更なし！
-class PoisonAttack(AttackStrategy):
-    def calculate_damage(self, base_power: int) -> int:
-        return base_power + 100
-```
-
-**TypeScript:**
+📝 **使い方:**
 ```typescript
 const warrior = new Player(10, new PhysicalAttack());
 warrior.attack(enemy); // 20

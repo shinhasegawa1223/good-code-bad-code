@@ -125,6 +125,14 @@ class HitPoint {
 }
 ```
 
+📝 **使い方:**
+```java
+HitPoint hp = new HitPoint(100);     // HP100で生成
+hp = hp.damage(30);                   // HP70になる
+hp = hp.recover(500);                 // HP999（最大値で自動補正）
+// HitPoint bad = new HitPoint(-10); // ❌ 即座にエラー！不正なHPは存在できない
+```
+
 **Python:**
 ```python
 # ✅ カプセル化されたクラス
@@ -154,6 +162,14 @@ class HitPoint:
         return HitPoint(recovered)
 ```
 
+📝 **使い方:**
+```python
+hp = HitPoint(100)
+hp = hp.damage(30)                    # HP70
+hp = hp.recover(500)                  # HP999（最大値で自動補正）
+# bad = HitPoint(-10)                # ❌ ValueError! 不正なHPは存在できない
+```
+
 **TypeScript:**
 ```typescript
 // ✅ カプセル化されたクラス
@@ -180,25 +196,7 @@ class HitPoint {
 }
 ```
 
-#### 📝 外部からの使い方（使用例）
-
-**Java:**
-```java
-HitPoint hp = new HitPoint(100);     // HP100で生成
-hp = hp.damage(30);                   // HP70になる
-hp = hp.recover(500);                 // HP999（最大値で自動補正）
-// HitPoint bad = new HitPoint(-10); // ❌ 即座にエラー！不正なHPは存在できない
-```
-
-**Python:**
-```python
-hp = HitPoint(100)
-hp = hp.damage(30)                    # HP70
-hp = hp.recover(500)                  # HP999（最大値で自動補正）
-# bad = HitPoint(-10)                # ❌ ValueError! 不正なHPは存在できない
-```
-
-**TypeScript:**
+📝 **使い方:**
 ```typescript
 let hp = new HitPoint(100);
 hp = hp.damage(30);                   // HP70
