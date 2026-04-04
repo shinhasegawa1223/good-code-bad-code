@@ -4,14 +4,21 @@
 > 片方のテレビの音量を上げたつもりが、 **もう片方のテレビの音量も一緒に上がってしまう** 。
 > プログラムでも同じで、 **可変なインスタンスを複数の場所で共有** すると、一方の変更がもう一方に意図せず波及します。
 
+> 💡 **用語: 参照型（Reference Type）とは？**
+> Java や TypeScript のオブジェクトは、変数に入っているのは **データそのものではなく「データの住所（参照）」** です。
+> 例えば `Weapon sword = new Weapon(attackPower)` の `attackPower` は「住所のコピー」を渡しているだけなので、 **sword と axe が同じ住所を持っていたら、中身も同じもの** になります。
+> これが「インスタンスの共有」で問題が起きる根本的な理由です。
+
 ### ケース1: 可変インスタンスの使い回し
+
+まず、以下のような `AttackPower` クラスと `Weapon` クラスがあるとします。
 
 **Java:**
 ```java
 // ❌ value に final が付いていない → 外部から自由に書き換え可能
 class AttackPower {
     static final int MIN = 0;
-    int value;  // ← final なし！変更し放題
+    int value;  // ← final なし！誰でも変更できる状態
 
     AttackPower(int value) {
         if (value < MIN) {
@@ -23,6 +30,8 @@ class AttackPower {
 
 class Weapon {
     final AttackPower attackPower;
+    // ↑ Weapon が持つ AttackPower の「参照先」は変えられないが、
+    //   AttackPower の中の value は変更できてしまう！
 
     Weapon(AttackPower attackPower) {
         this.attackPower = attackPower;
@@ -51,7 +60,7 @@ class Weapon:
 // ❌ value が変更可能 → 外部から自由に書き換え可能
 class AttackPower {
     static readonly MIN = 0;
-    value: number; // ← readonly なし！変更し放題
+    value: number; // ← readonly なし！誰でも変更できる
 
     constructor(value: number) {
         if (value < AttackPower.MIN) throw new Error();
@@ -61,6 +70,7 @@ class AttackPower {
 
 class Weapon {
     readonly attackPower: AttackPower;
+    // ↑ attackPower の参照先は変えられないが、中の value は変更可能
 
     constructor(attackPower: AttackPower) {
         this.attackPower = attackPower;
@@ -79,35 +89,71 @@ class Weapon {
 
 #### 1. 🔴 1つのインスタンスを共有すると、変更が全てに波及する
 
-同じ `AttackPower` インスタンスを剣と斧で共有してしまった場合：
+同じ `AttackPower` インスタンスを剣と斧で **共有** してしまった場合、何が起きるか見てみましょう。
 
 **Java:**
 ```java
 // ❌ 同じ AttackPower インスタンスを使い回す
 AttackPower attackPower = new AttackPower(30);
-Weapon sword = new Weapon(attackPower);  // 剣
-Weapon axe   = new Weapon(attackPower);  // 斧 ← 同じインスタンスを参照！
+Weapon sword = new Weapon(attackPower);  // 剣 ← attackPower の住所を渡す
+Weapon axe   = new Weapon(attackPower);  // 斧 ← 同じ住所を渡す！
 
 // 剣だけ強化したつもりが...
 sword.attackPower.value += 30;
 
 System.out.println(sword.attackPower.value); // → 60 ✅ 期待通り
 System.out.println(axe.attackPower.value);   // → 60 ❌ 斧も60になった！
+// 同じオブジェクトを指しているので、片方を変えると両方変わる
+```
+
+**Python:**
+```python
+# ❌ 同じ AttackPower インスタンスを使い回す
+attack_power = AttackPower(30)
+sword = Weapon(attack_power)  # 剣 ← 同じオブジェクトを渡す
+axe   = Weapon(attack_power)  # 斧 ← 同じオブジェクトを渡す！
+
+# 剣だけ強化したつもりが...
+sword.attack_power.value += 30
+
+print(sword.attack_power.value)  # → 60 ✅ 期待通り
+print(axe.attack_power.value)    # → 60 ❌ 斧も60になった！
+```
+
+**TypeScript:**
+```typescript
+// ❌ 同じ AttackPower インスタンスを使い回す
+const attackPower = new AttackPower(30);
+const sword = new Weapon(attackPower);  // 剣 ← 同じオブジェクトを渡す
+const axe   = new Weapon(attackPower);  // 斧 ← 同じオブジェクトを渡す！
+
+// 剣だけ強化したつもりが...
+sword.attackPower.value += 30;
+
+console.log(sword.attackPower.value); // → 60 ✅ 期待通り
+console.log(axe.attackPower.value);   // → 60 ❌ 斧も60になった！
 ```
 
 > 対象: `AttackPower attackPower` を2つの `Weapon` で共有
 
 | 名前 | 問題 |
 |---|---|
-| インスタンスの共有 | `sword` と `axe` が **同じ `AttackPower` オブジェクト** を参照しているため、一方を変更すると **もう一方も変わってしまう** 。これは参照型の特性で、コード上からは見抜きにくいバグになる。 |
+| インスタンスの共有 | `sword` と `axe` が **同じ `AttackPower` オブジェクト** を参照しているため、一方を変更すると **もう一方も変わってしまう** 。同じ住所の家を2人が共有しているようなもので、1人が家具を動かすともう1人にも影響する。 |
+
+> 💡 **初学者向け補足: なぜこうなるの？**
+> `int` や `number` のようなプリミティブ型は **値のコピー** が渡されるので問題ない。
+> しかしオブジェクト（クラスのインスタンス）は **参照（住所）のコピー** が渡される。
+> つまり `sword` も `axe` も **同じ住所を持っている** ので、その住所の中身を変えたら両方に影響する。
 
 <br>
 
 #### 2. 🔴 メソッドによる予期せぬ状態変更
 
+`enhance()` や `disable()` のように、自分自身の `value` を直接書き換えるメソッドも問題です。
+
 **Java:**
 ```java
-// ❌ メソッドがインスタンスの状態を直接変更する
+// ❌ メソッドがインスタンスの状態を直接変更する（副作用あり）
 class AttackPower {
     static final int MIN = 0;
     int value;
@@ -119,39 +165,42 @@ class AttackPower {
 
     // ❌ 自分自身の value を直接書き換える（副作用！）
     void enhance(int increase) {
-        value += increase;
+        value += increase;  // ← 元の値が消えてしまう
     }
 
     // ❌ 自分自身の value を直接書き換える（副作用！）
     void disable() {
-        value = MIN;
+        value = MIN;  // ← 強制的に0にしてしまう
     }
 }
 ```
 
 ```java
+// ❌ 別の場所から同じインスタンスを操作すると...
 AttackPower attackPower = new AttackPower(10);
 
-// スレッドAで強化
+// 処理Aで強化
 attackPower.enhance(10);  // value = 20 になる
 
-// 別のスレッドBで無力化
+// 処理Bで無力化（たとえば別のスレッドや別のメソッドから）
 attackPower.disable();    // value = 0 になる！
 
-// スレッドAは value が20のつもりで処理を続行 → バグ！
+// 処理Aは value が20のつもりで処理を続行 → バグ！
 System.out.println(attackPower.value); // → 0（予期しない値）
 ```
 
 | 名前 | 問題 |
 |---|---|
-| `enhance()` / `disable()` | メソッドが **自分自身の `value` を直接書き換える** 。複数のスレッドや複数の呼び出し元から同じインスタンスを操作した場合、 **誰がいつ値を変えたか** の追跡が極めて困難になる。 |
+| `enhance()` / `disable()` | メソッドが **自分自身の `value` を直接書き換える** 。複数の場所から同じインスタンスの `enhance()` や `disable()` を呼ぶと、 **「今 value はいくつ？」が分からなくなる** 。特にマルチスレッド環境では予測不能な動作を引き起こす。 |
 
 > 💡 **用語: 主作用と副作用**
 >
-> | 種類 | 意味 | 例 |
+> | 種類 | 意味 | 具体例 |
 > |---|---|---|
-> | **主作用** | 関数が引数を受け取り、戻り値を返すこと | `int add(int a, int b) { return a + b; }` |
-> | **副作用** | 主作用以外に **外部の状態を変更** すること | インスタンス変数の変更、グローバル変数の変更、ファイルI/O、参照型引数の変更 |
+> | **主作用** | 関数が引数を受け取り、 **戻り値を返す** こと | `int add(int a, int b) { return a + b; }` |
+> | **副作用** | 主作用以外に **外部の状態を変更** してしまうこと | インスタンス変数の変更、グローバル変数の変更、ファイルI/O、参照型引数の変更 |
+>
+> 副作用のあるコードは「このメソッドを呼ぶと **見えないところで何かが変わる** 」ため、バグの原因になりやすい。
 
 ---
 
@@ -161,6 +210,8 @@ System.out.println(attackPower.value); // → 0（予期しない値）
 > 1. データ・状態は **引数で受け取る**
 > 2. 受け取った状態を **変更しない**
 > 3. 値は **関数の戻り値として返却する**
+>
+> この3つを守ると、関数は「入力 → 出力」だけの **予測可能な箱** になり、副作用がゼロになる。
 
 **一言でいうと:** `value` を `final` にして直接変更を禁止。`enhance()` や `disable()` は元のオブジェクトを変更せず、 **新しい `AttackPower` を生成して返す** 。
 
@@ -169,7 +220,7 @@ System.out.println(attackPower.value); // → 0（予期しない値）
 // ✅ 不変な AttackPower クラス
 class AttackPower {
     static final int MIN = 0;
-    final int value;  // ← final で不変！
+    final int value;  // ← final で不変！一度セットしたら変わらない
 
     AttackPower(final int value) {
         if (value < MIN) {
@@ -194,12 +245,12 @@ class AttackPower {
 ```java
 final AttackPower attackPower = new AttackPower(20);
 
-// ✅ 強化しても元の attackPower は変わらない（新しいインスタンスが返る）
+// ✅ 強化 → 新しいインスタンスが返る。元の attackPower は変わらない！
 final AttackPower reinforced = attackPower.reinForce(new AttackPower(15));
 System.out.println(attackPower.value);  // → 20（変わらない！）
 System.out.println(reinforced.value);   // → 35（新しいインスタンス）
 
-// ✅ 無力化しても元は変わらない
+// ✅ 無力化 → 新しいインスタンスが返る。元は変わらない！
 final AttackPower disabled = attackPower.disable();
 System.out.println(attackPower.value);  // → 20（変わらない！）
 System.out.println(disabled.value);     // → 0（新しいインスタンス）
@@ -214,10 +265,11 @@ class AttackPower:
     def __init__(self, value: int) -> None:
         if value < self.MIN:
             raise ValueError()
-        self._value: int = value
+        self._value: int = value  # _プレフィックスで外部変更を抑制
 
     @property
     def value(self) -> int:
+        """読み取り専用"""
         return self._value
 
     # ✅ 新しいインスタンスを返す（元は変更しない）
@@ -233,10 +285,12 @@ class AttackPower:
 ```python
 attack_power = AttackPower(20)
 
+# ✅ 強化 → 新しいインスタンスが返る
 reinforced = attack_power.reinforce(AttackPower(15))
 print(attack_power.value)  # → 20（変わらない！）
 print(reinforced.value)    # → 35
 
+# ✅ 無力化 → 新しいインスタンスが返る
 disabled = attack_power.disable()
 print(attack_power.value)  # → 20（変わらない！）
 print(disabled.value)      # → 0
@@ -247,22 +301,43 @@ print(disabled.value)      # → 0
 // ✅ 不変な AttackPower クラス
 class AttackPower {
     static readonly MIN = 0;
-    readonly value: number; // ← readonly で不変！
+    readonly value: number; // ← readonly で不変！一度セットしたら変わらない
 
     constructor(value: number) {
         if (value < AttackPower.MIN) throw new Error();
         this.value = value;
     }
 
+    // ✅ 新しいインスタンスを返す（元は変更しない）
     reinforce(increment: AttackPower): AttackPower {
         return new AttackPower(this.value + increment.value);
     }
 
+    // ✅ 新しいインスタンスを返す
     disable(): AttackPower {
         return new AttackPower(AttackPower.MIN);
     }
 }
 ```
+
+📝 **使い方:**
+```typescript
+const attackPower = new AttackPower(20);
+
+// ✅ 強化 → 新しいインスタンスが返る。元は変わらない！
+const reinforced = attackPower.reinforce(new AttackPower(15));
+console.log(attackPower.value);  // → 20（変わらない！）
+console.log(reinforced.value);   // → 35（新しいインスタンス）
+
+// ✅ 無力化 → 新しいインスタンスが返る
+const disabled = attackPower.disable();
+console.log(attackPower.value);  // → 20（変わらない！）
+console.log(disabled.value);     // → 0（新しいインスタンス）
+```
+
+> 💡 **初学者向け補足: 「新しいインスタンスを返す」ってどういうこと？**
+> `reinForce()` の中で `return new AttackPower(...)` と書いています。これは **元のオブジェクトはそのまま残して、別の新しいオブジェクトを作って返す** ということ。
+> 例えるなら、「元のメモ用紙に書き足す」のではなく、 **「新しいメモ用紙に結果を書いて渡す」** イメージです。元のメモは変わらないので安全。
 
 <br>
 
@@ -323,6 +398,19 @@ class Weapon:
         return Weapon(reinforced)
 ```
 
+📝 **使い方:**
+```python
+weapon_a = Weapon(AttackPower(20))
+weapon_b = Weapon(AttackPower(20))
+
+# ✅ 武器Aだけ強化しても、武器Bには影響しない！
+reinforced_a = weapon_a.reinforce(AttackPower(5))
+
+print(weapon_a.attack_power.value)     # → 20（元のまま）
+print(reinforced_a.attack_power.value) # → 25（強化版）
+print(weapon_b.attack_power.value)     # → 20（影響なし！）
+```
+
 **TypeScript:**
 ```typescript
 // ✅ 不変な Weapon クラス
@@ -333,11 +421,25 @@ class Weapon {
         this.attackPower = attackPower;
     }
 
+    // ✅ 元の Weapon は変わらず、新しい Weapon を返す
     reinforce(increment: AttackPower): Weapon {
         const reinforced = this.attackPower.reinforce(increment);
         return new Weapon(reinforced);
     }
 }
+```
+
+📝 **使い方:**
+```typescript
+const weaponA = new Weapon(new AttackPower(20));
+const weaponB = new Weapon(new AttackPower(20));
+
+// ✅ 武器Aだけ強化しても、武器Bには一切影響しない！
+const reinforcedA = weaponA.reinforce(new AttackPower(5));
+
+console.log(weaponA.attackPower.value);     // → 20（元のまま）
+console.log(reinforcedA.attackPower.value);  // → 25（強化版）
+console.log(weaponB.attackPower.value);      // → 20（影響なし！）
 ```
 
 <br>
@@ -359,7 +461,7 @@ class Weapon {
 > **「可変インスタンスの共有による意図しない影響を根絶するため」**
 
 * 可変なオブジェクトを複数箇所で共有すると、一方の変更がもう一方に波及する。
-* メソッドが内部状態を直接変更する（副作用がある）と、特にマルチスレッド環境で予測不能な動作を引き起こす。
+* メソッドが内部状態を直接変更する（副作用がある）と、「今この値はいくつ？」が分からなくなる。
 
 #### 2. 目標（What）
 > **「どのオブジェクトも、生成後は状態が変わらないことが保証されている状態」**
@@ -371,7 +473,7 @@ class Weapon {
 
 | ステップ | ❌ 悪い例 | ⭕️ 良い例 |
 |:---:|---|---|
-| フィールド | `int value;` | `final int value;` |
+| フィールド | `int value;` | `final int value;`（Java） / `readonly value`（TS） |
 | 状態変更メソッド | `void enhance() { value += x; }` | `AttackPower reinForce() { return new AttackPower(...); }` |
 | インスタンス生成 | 1つのインスタンスを使い回す | 各用途ごとに独立したインスタンスを生成 |
 
